@@ -13,7 +13,7 @@ function displayProducts(products){
         let article = document.createElement("article");
         a.appendChild(article);
         article.innerHTML = `
-            <img src="${element.imageUrl}"/>
+            <img src="${element.imageUrl}" alt="${element.altTxt}"/>
             <h3>${element.name}</h3>
             <p>${element.description}</p>`;
     }

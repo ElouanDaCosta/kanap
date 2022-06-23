@@ -1,25 +1,26 @@
 async function FetchProduct(Cart) {
     for (let j = 0; j < Cart.length; j++) {
-        await fetch(`http://localhost:3000/api/products/${Cart[j].product._id}`)
+        await fetch(`http://localhost:3000/api/products/${Object.values(Cart)[j].id}`)
             .then(response => response.json())
             .then(product => {
+                
                 document
                     .querySelector('#cart__items')
                     .innerHTML += `
-            <article class="cart__item" data-id="${product._id}" data-color="${Object.values(Cart)[j].itemColor}">
+            <article class="cart__item" data-id="${Object.values(Cart)[j].id}" data-color="${Object.values(Cart)[j].color}">
             <div class="cart__item__img">
                 <img src="${product.imageUrl}" alt="${product.name}">
             </div>
             <div class="cart__item__content">
                 <div class="cart__item__content__description">
                     <h2>${product.name}</h2>
-                    <p>${Object.values(Cart)[j].itemColor}</p>
+                    <p>${Object.values(Cart)[j].color}</p>
                     <p>${product.price}</p>
                 </div>
                 <div class="cart__item__content__setting">
                     <div class="cart__item__content__setting__quantity">
                         <p>Qté : </p>
-                        <input type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="${Object.values(Cart)[j].itemNumber}"
+                        <input type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="${Object.values(Cart)[j].quantity}"
                     </div>
                     <div class="cart__item__content__settings__delete">
                         <p class="deleteItem">Supprimer</p>
@@ -41,8 +42,8 @@ function ChangeQuantity() {
             const quantity = itemQuantity.closest('.cart__item');
             const id = quantity.dataset.id;
             const color = quantity.dataset.color;
-            const product = cart.find(item => item.product._id === id && item.itemColor === color);
-            product.itemNumber = e.target.value;
+            const product = cart.find(item => item.id === id && item.color === color);
+            product.quantity = e.target.value;
             localStorage.setItem('cart', JSON.stringify(cart));
             TotalPrice()
         })
@@ -59,7 +60,7 @@ function DeleteButton() {
             const suppr = supprButton.closest('.cart__item');
             const id = suppr.dataset.id;
             const color = suppr.dataset.color;
-            cart = cart.filter(item => !(item.product._id === id && item.itemColor === color));
+            cart = cart.filter(item => !(item.id === id && item.color === color));
             localStorage.setItem('cart', JSON.stringify(cart));
             suppr.remove();
             TotalPrice();
@@ -99,11 +100,15 @@ function TotalPrice() {
     let totalPrice = 0;
     let totalQuantity = 0;
     for (let i = 0; i < Cart.length; i++) {
-        totalPrice += Cart[i].product.price * Cart[i].itemNumber;
-        totalQuantity += parseInt(Cart[i].itemNumber);
+        fetch(`http://localhost:3000/api/products/${Object.values(Cart)[i].id}`)
+            .then(response => response.json())
+            .then(product => {
+                totalPrice += product.price * Object.values(Cart)[i].quantity;
+                totalQuantity += +Object.values(Cart)[i].quantity;
+                document.querySelector('#totalPrice').innerText = totalPrice;
+                document.querySelector('#totalQuantity').innerText = totalQuantity;
+            })
     }
-    document.querySelector('#totalPrice').innerText = totalPrice;
-    document.querySelector('#totalQuantity').innerText = totalQuantity;
 }
 
 function PostCart(e) {
@@ -146,7 +151,8 @@ function ValidateForm() {
     let email = document.querySelector('#email').value;
     let nameRegex = /^[a-zA-Z ]{2,30}$/;
     let adressRegex = /^[a-zA-Z0-9\s,.'-]{3,}$/;
-    return (nameRegex.test(firstName) && nameRegex.test(lastName) && adressRegex.test(address) && nameRegex.test(city))
+    let emailRegex = /^[a-zA-Z0-9._-]+@[a-z0-9._-]{2,}\.[a-z]{2,4}$/;
+    return (nameRegex.test(firstName) && nameRegex.test(lastName) && adressRegex.test(address) && nameRegex.test(city) && emailRegex.test(email));
 }
 
 function GetProductsId() {
@@ -154,7 +160,7 @@ function GetProductsId() {
     let cart = localStorage.getItem('cart');
     let Cart = JSON.parse(cart);
     for (let i = 0; i < Cart.length; i++) {
-        productsId.push(Cart[i].product._id);
+        productsId.push(Cart[i].id);
     }
     return productsId;
 }
@@ -167,7 +173,6 @@ async function init() {
     DeleteButton();
     DeleteButtonMessage();
     TotalPrice();
-
     let postCart = document.querySelector('#order');
     postCart.addEventListener('click', PostCart);
 }
