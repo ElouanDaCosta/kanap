@@ -28,7 +28,7 @@ function addToCart(product){
     let items = JSON.parse(localStorage.getItem("cart")) || [];
     let sameItem = items.find(item => item.id === id && item.color === color);
     
-    if (quantity < 1 && color < 1) {
+    if (quantity < 1 || color >= color.length) {
         alert("Veuillez selectionner une couleur et une quantité !");
         return
     }
