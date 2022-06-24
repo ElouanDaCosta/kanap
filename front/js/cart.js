@@ -1,3 +1,4 @@
+//affiche l'ensemble des produits dans le panier en utilisant le localStorage et l'API
 async function FetchProduct(Cart) {
     for (let j = 0; j < Cart.length; j++) {
         await fetch(`http://localhost:3000/api/products/${Object.values(Cart)[j].id}`)
@@ -32,6 +33,7 @@ async function FetchProduct(Cart) {
     }
 }
 
+//Change la quantité d'un produit
 function ChangeQuantity() {
     let itemQuantities = document.querySelectorAll('.itemQuantity')
     itemQuantities.forEach((itemQuantity) => {
@@ -50,6 +52,7 @@ function ChangeQuantity() {
     })
 }
 
+//supprime un produit du panier
 function DeleteButton() {
     let supprButtons = document.querySelectorAll('.deleteItem')
     supprButtons.forEach((supprButton) => {
@@ -68,6 +71,7 @@ function DeleteButton() {
     })
 }
 
+//message de confirmation quand on supprime un produit
 function DeleteButtonMessage() {
     let supprButtons = document.querySelectorAll('.deleteItem')
     supprButtons.forEach((supprButton) => {
@@ -94,6 +98,7 @@ function DeleteButtonMessage() {
     })
 }
 
+//calcule le prix total du panier
 function TotalPrice() {
     let cart = localStorage.getItem('cart');
     let Cart = JSON.parse(cart);
@@ -111,10 +116,10 @@ function TotalPrice() {
     }
 }
 
+//envoie les données du panier a l'API
 function PostCart(e) {
     e.preventDefault()
     if(!ValidateForm()){
-        alert('Veuillez entrer des informations valides');
         return
     }
     let productsId = GetProductsId();
@@ -143,6 +148,7 @@ function PostCart(e) {
         });
 }
 
+//vérifie si le form est valide
 function ValidateForm() {
     let firstName = document.querySelector('#firstName').value;
     let lastName = document.querySelector('#lastName').value;
@@ -152,9 +158,37 @@ function ValidateForm() {
     let nameRegex = /^[a-zA-Z ]{2,30}$/;
     let adressRegex = /^[a-zA-Z0-9\s,.'-]{3,}$/;
     let emailRegex = /^[a-zA-Z0-9._-]+@[a-z0-9._-]{2,}\.[a-z]{2,4}$/;
-    return (nameRegex.test(firstName) && nameRegex.test(lastName) && adressRegex.test(address) && nameRegex.test(city) && emailRegex.test(email));
+    
+    if (nameRegex.test(firstName)) {
+        if (nameRegex.test(lastName)) {
+            if (adressRegex.test(address)) {
+                if (nameRegex.test(city)) {
+                    if (emailRegex.test(email)) {
+                        return true
+                    } else {
+                        document.querySelector("#emailErrorMsg").innerText = "Veuillez entrer une addresse mail valide";
+                        return false;
+                    }
+                } else {
+                    document.querySelector("#cityErrorMsg").innerText = "Veuillez entrer une ville valide";
+                    return false;
+                }
+                    
+            } else {
+                document.querySelector("#addressErrorMsg").innerText = "Veuillez entrer une addresse valide";
+                return false;
+            }
+    } else {
+        document.querySelector("#lastNameErrorMsg").innerText = "Veuillez entrer un nom valide";
+        return false;
+    }
+    } else {
+        document.querySelector("#firstNameErrorMsg").innerText = "Veuillez entrer un nom valide";
+        return false;
+    }
 }
 
+//récupère les id des produits du panier et les stockes dans un tableau
 function GetProductsId() {
     let productsId = [];
     let cart = localStorage.getItem('cart');
@@ -165,6 +199,7 @@ function GetProductsId() {
     return productsId;
 }
 
+//regroupe les fonctions dans une seule fonction pour les executer au chargement de la page
 async function init() {
     let cart = localStorage.getItem('cart');
     let Cart = JSON.parse(cart);

@@ -1,8 +1,10 @@
+//récupère les produits via l'API
 function fetchProducts() {
     return fetch("http://localhost:3000/api/products")
         .then((response) => response.json())
 }
 
+//affiche les produits dans le DOM
 function displayProducts(products){
     const value = products
     for (let index = 0; index < value.length; index++) {
@@ -19,6 +21,7 @@ function displayProducts(products){
     }
 }
 
+//execute la fonction fetchProducts() et affiche les produits dans le DOM 
 async function init(){
     const products = await fetchProducts()
     displayProducts(products)
